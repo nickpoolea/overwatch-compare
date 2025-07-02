@@ -1,0 +1,352 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.App-header {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.main-content {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.comparison-form {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 40px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 20px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #ffe6e6;
+  border: 2px solid #ff4444;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+  color: #cc0000;
+}
+
+.comparison-results {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: left;
+}
+
+.comparison-results h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+}
+
+.category-section {
+  margin-bottom: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.category-title {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin: 0;
+  padding: 15px 20px;
+  font-size: 1.3rem;
+}
+
+.stats-table {
+  background: white;
+}
+
+.stats-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  font-weight: bold;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.stats-row:hover {
+  background-color: #f8f9fa;
+}
+
+.stats-row:last-child {
+  border-bottom: none;
+}
+
+.stat-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.player-value {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  color: #555;
+}
+
+.difference {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.difference:not(:contains("N/A")):not(:contains("Ties")) {
+  color: #007bff;
+}
+
+.category-summary {
+  background-color: #f8f9fa;
+  border-top: 2px solid #e0e0e0;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 10px 20px;
+  font-weight: bold;
+  color: #555;
+}
+
+.summary-row:first-child {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Enhanced Analysis Styles */
+.enhanced-analysis {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.analysis-title {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  text-align: center;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.analysis-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.insights-card {
+  grid-column: 1 / -1;
+  border-left-color: #28a745;
+}
+
+.analysis-card h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.score-comparison,
+.effectiveness-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.score-item,
+.effectiveness-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+}
+
+.player-name {
+  font-weight: 600;
+  color: #495057;
+}
+
+.score-value,
+.effectiveness-value {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+.score-difference {
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.overall-verdict {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.strengths {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #ffc107;
+}
+
+.strength-tags {
+  display: block;
+  margin-top: 5px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.detailed-stats .stats-title {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  text-align: center;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+}
+
+/* Responsive adjustments for enhanced analysis */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-header,
+  .stats-row,
+  .summary-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .stat-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .player-value,
+  .difference {
+    margin-bottom: 10px;
+  }
+
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .score-item,
+  .effectiveness-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 5px;
+  }
+}
