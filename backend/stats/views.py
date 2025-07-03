@@ -2,12 +2,42 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse, Http404
+from django.template.loader import get_template
+from django.template import TemplateDoesNotExist
+from django.conf import settings
+import os
 from .overwatch_service import get_player_stats, compare_hero_stats, enhanced_compare_hero_stats, Hero
 import json
 
 def favicon_view(request):
     """Return a 204 No Content for missing favicon and Apple touch icons."""
     return HttpResponse(status=204)
+
+def react_app_view(request):
+    """Serve the React app with proper MIME types and headers."""
+    try:
+        # Try to get the template
+        template = get_template('index.html')
+        response = HttpResponse(template.render(request=request))
+        response['Content-Type'] = 'text/html; charset=utf-8'
+        response['X-Content-Type-Options'] = 'nosniff'
+        return response
+    except TemplateDoesNotExist:
+        # Fallback: try to serve the file directly
+        possible_paths = [
+            os.path.join(settings.BASE_DIR, 'frontend/build/index.html'),
+            os.path.join(settings.BASE_DIR, '../frontend/build/index.html'),
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                response = HttpResponse(content, content_type='text/html; charset=utf-8')
+                response['X-Content-Type-Options'] = 'nosniff'
+                return response
+        
+        return HttpResponse("React app not found", status=404)
 
 @api_view(['GET'])
 def get_heroes(request):

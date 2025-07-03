@@ -19,7 +19,7 @@ from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
-from stats.views import favicon_view
+from stats.views import favicon_view, react_app_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,9 +29,30 @@ urlpatterns = [
     path('apple-touch-icon.png', favicon_view, name='apple-touch-icon'),
     path('apple-touch-icon-precomposed.png', favicon_view, name='apple-touch-icon-precomposed'),
     # Serve React frontend for all other routes
-    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='frontend'),
+    re_path(r'^.*$', react_app_view, name='frontend'),
 ]
 
 # Serve static files in both development and production
 # In production, this is needed since we're using Django's runserver
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+from django.views.static import serve
+from django.http import FileResponse
+import mimetypes
+import os
+
+def serve_static_with_mime(request, path, document_root=None, show_indexes=False):
+    """Custom static file handler with proper MIME types."""
+    response = serve(request, path, document_root, show_indexes)
+    
+    # Ensure proper MIME types
+    if path.endswith('.css'):
+        response['Content-Type'] = 'text/css; charset=utf-8'
+    elif path.endswith('.js'):
+        response['Content-Type'] = 'application/javascript; charset=utf-8'
+    elif path.endswith('.json'):
+        response['Content-Type'] = 'application/json; charset=utf-8'
+    
+    return response
+
+urlpatterns += [
+    re_path(r'^static/(?P<path>.*)$', serve_static_with_mime, {'document_root': settings.STATIC_ROOT}),
+]

@@ -157,8 +157,11 @@ LOCAL_STATIC_PATH = os.path.join(BASE_DIR, '../frontend/build/static')
 STATICFILES_DIRS = []
 if os.path.exists(DOCKER_STATIC_PATH):
     STATICFILES_DIRS.append(DOCKER_STATIC_PATH)
+    # Also add the main build directory for manifest.json, etc.
+    STATICFILES_DIRS.append(os.path.join(BASE_DIR, 'frontend/build'))
 elif os.path.exists(LOCAL_STATIC_PATH):
     STATICFILES_DIRS.append(LOCAL_STATIC_PATH)
+    STATICFILES_DIRS.append(os.path.join(BASE_DIR, '../frontend/build'))
 
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = [
