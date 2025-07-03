@@ -27,15 +27,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/ ./
 
+# Copy Railway startup script
+COPY railway_start.py ./
+
 # Copy built frontend from previous stage
 COPY --from=frontend-builder /app/frontend/build ./frontend/build/
 
-# Run migrations and collect static files
+# Run migrations and collect static files during build
 RUN python manage.py migrate --noinput
 RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000
 
-# Start Django server directly
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Use Railway startup script
+CMD ["python", "railway_start.py"]

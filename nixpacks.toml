@@ -16,4 +16,4 @@ cmds = [
 ]
 
 [phases.start]
-cmd = "./start.sh"
+cmd = "python railway_start.py"
