@@ -136,7 +136,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, '../frontend/build'),  # React build directory
+            os.path.join(BASE_DIR, 'frontend/build'),  # React build directory in Docker
+            os.path.join(BASE_DIR, '../frontend/build'),  # React build directory locally
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -149,10 +150,15 @@ TEMPLATES = [
     },
 ]
 
-# Static files directories for React build
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, '../frontend/build/static'),
-] if os.path.exists(os.path.join(BASE_DIR, '../frontend/build/static')) else []
+# Static files directories for React build - check both Docker and local paths
+DOCKER_STATIC_PATH = os.path.join(BASE_DIR, 'frontend/build/static')
+LOCAL_STATIC_PATH = os.path.join(BASE_DIR, '../frontend/build/static')
+
+STATICFILES_DIRS = []
+if os.path.exists(DOCKER_STATIC_PATH):
+    STATICFILES_DIRS.append(DOCKER_STATIC_PATH)
+elif os.path.exists(LOCAL_STATIC_PATH):
+    STATICFILES_DIRS.append(LOCAL_STATIC_PATH)
 
 # CORS settings for production
 CORS_ALLOWED_ORIGINS = [
