@@ -4,7 +4,5 @@
       "./build.sh"
     ]
   },
-  "deploy": {
-    "startCommand": "bash start.sh"
-  }
+  "deploy": {}
 }
