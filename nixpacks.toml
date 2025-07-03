@@ -12,9 +12,8 @@ cmds = [
 
 [phases.build] 
 cmds = [
-  "npm run build --prefix frontend",
-  "python backend/manage.py collectstatic --noinput"
+  "npm run build --prefix frontend"
 ]
 
 [phases.start]
-cmd = "python backend/manage.py runserver 0.0.0.0:$PORT"
+cmd = "./start.sh"
