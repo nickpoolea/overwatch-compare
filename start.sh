@@ -2,18 +2,34 @@
 # Startup script for Railway deployment
 
 echo "🚀 Starting Overwatch Comparison App..."
+echo "📍 Current directory: $(pwd)"
+echo "📁 Directory contents:"
+ls -la
 
-# We're already in the right directory in Docker (/app)
-# Backend files are copied directly to /app
+echo "=== ENVIRONMENT VARIABLES DEBUG ==="
+echo "PORT: ${PORT:-NOT SET}"
+echo "ALLOWED_HOSTS: ${ALLOWED_HOSTS:-NOT SET}"
+echo "DEBUG: ${DEBUG:-NOT SET}"
+echo "SECRET_KEY: $(if [ -n "$SECRET_KEY" ]; then echo "SET"; else echo "NOT SET"; fi)"
+echo "CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-NOT SET}"
+echo "==================================="
+
+# Check if we need to change to backend directory
+if [ -d "backend" ]; then
+    echo "📁 Changing to backend directory..."
+    cd backend
+    echo "📁 Now in: $(pwd)"
+fi
 
 # Run migrations
 echo "📋 Running Django migrations..."
-python manage.py migrate --noinput
+python3 manage.py migrate --noinput
 
 # Collect static files
 echo "📁 Collecting static files..."
-python manage.py collectstatic --noinput
+python3 manage.py collectstatic --noinput
 
 # Start the server
-echo "🌐 Starting Django server..."
-python manage.py runserver 0.0.0.0:$PORT
+PORT=${PORT:-8000}
+echo "🌐 Starting Django server on port $PORT"
+python3 manage.py runserver "0.0.0.0:$PORT"

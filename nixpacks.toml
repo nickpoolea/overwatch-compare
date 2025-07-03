@@ -12,8 +12,9 @@ cmds = [
 
 [phases.build] 
 cmds = [
-  "npm run build --prefix frontend"
+  "npm run build --prefix frontend",
+  "chmod +x railway_start.py"
 ]
 
 [phases.start]
-cmd = "python railway_start.py"
+cmd = "bash start.sh"
