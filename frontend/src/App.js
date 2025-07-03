@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -146,6 +146,19 @@ function App() {
   const [comparison, setComparison] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Ref for the results container to enable auto-scrolling
+  const resultsRef = useRef(null);
+
+  // Auto-scroll to results when comparison data is available
+  useEffect(() => {
+    if (comparison && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, [comparison]);
 
   useEffect(() => {
     fetchHeroes();
@@ -387,7 +400,7 @@ function App() {
       </div>
 
       {comparison && (
-        <div className="results-container">
+        <div className="results-container" ref={resultsRef}>
           <div className="alert alert-success">
             <strong>{comparison.hero.toUpperCase()} Comparison:</strong> {comparison.player1} vs {comparison.player2}
           </div>
