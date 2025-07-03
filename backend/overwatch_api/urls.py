@@ -32,35 +32,5 @@ urlpatterns = [
     re_path(r'^.*$', react_app_view, name='frontend'),
 ]
 
-# Serve static files in both development and production
-# In production, this is needed since we're using Django's runserver
-from django.views.static import serve
-from django.http import HttpResponse
-import mimetypes
-import os
-
-def serve_static_with_correct_mime(request, path, document_root=None):
-    """Serve static files with correct MIME types."""
-    # Set correct MIME types
-    if path.endswith('.js'):
-        content_type = 'application/javascript; charset=utf-8'
-    elif path.endswith('.css'):
-        content_type = 'text/css; charset=utf-8'
-    elif path.endswith('.json'):
-        content_type = 'application/json; charset=utf-8'
-    else:
-        content_type, _ = mimetypes.guess_type(path)
-        if not content_type:
-            content_type = 'application/octet-stream'
-    
-    try:
-        response = serve(request, path, document_root)
-        response['Content-Type'] = content_type
-        response['Cache-Control'] = 'public, max-age=3600'
-        return response
-    except:
-        return HttpResponse("File not found", status=404)
-
-urlpatterns += [
-    re_path(r'^static/(?P<path>.*)$', serve_static_with_correct_mime, {'document_root': settings.STATIC_ROOT}),
-]
+# Static files are now handled by WhiteNoise middleware
+# No need for custom static file serving
