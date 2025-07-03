@@ -148,14 +148,6 @@ elif os.path.exists(LOCAL_STATIC_PATH):
     STATICFILES_DIRS.append(LOCAL_STATIC_PATH)
     STATICFILES_DIRS.append(os.path.join(BASE_DIR, '../frontend/build'))
 
-# CORS settings for production
-CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
-    if origin.strip()
-]
-
-CORS_ALLOW_CREDENTIALS = True
-
 # Security settings for production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
