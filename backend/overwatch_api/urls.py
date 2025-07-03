@@ -19,10 +19,15 @@ from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
+from stats.views import favicon_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('stats.urls')),
+    # Handle missing favicon and Apple touch icons
+    path('favicon.ico', favicon_view, name='favicon'),
+    path('apple-touch-icon.png', favicon_view, name='apple-touch-icon'),
+    path('apple-touch-icon-precomposed.png', favicon_view, name='apple-touch-icon-precomposed'),
     # Serve React frontend for all other routes
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='frontend'),
 ]

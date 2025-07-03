@@ -1,8 +1,13 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import HttpResponse, Http404
 from .overwatch_service import get_player_stats, compare_hero_stats, enhanced_compare_hero_stats, Hero
 import json
+
+def favicon_view(request):
+    """Return a 204 No Content for missing favicon and Apple touch icons."""
+    return HttpResponse(status=204)
 
 @api_view(['GET'])
 def get_heroes(request):
