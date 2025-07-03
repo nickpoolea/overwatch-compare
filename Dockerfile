@@ -30,11 +30,12 @@ COPY backend/ ./
 # Copy built frontend from previous stage
 COPY --from=frontend-builder /app/frontend/build ./frontend/build/
 
-# Collect Django static files
+# Run migrations and collect static files
+RUN python manage.py migrate --noinput
 RUN python manage.py collectstatic --noinput
 
 # Expose port
 EXPOSE 8000
 
-# Start Django (serves both API and frontend)
+# Start Django server directly
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

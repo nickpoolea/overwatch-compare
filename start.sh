@@ -3,8 +3,8 @@
 
 echo "🚀 Starting Overwatch Comparison App..."
 
-# Change to backend directory
-cd backend
+# We're already in the right directory in Docker (/app)
+# Backend files are copied directly to /app
 
 # Run migrations
 echo "📋 Running Django migrations..."
