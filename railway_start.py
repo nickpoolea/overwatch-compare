@@ -7,6 +7,15 @@ import subprocess
 import sys
 
 def main():
+    # Debug: Print environment variables
+    print("=== ENVIRONMENT VARIABLES DEBUG ===")
+    print(f"PORT: {os.environ.get('PORT', 'NOT SET')}")
+    print(f"ALLOWED_HOSTS: {os.environ.get('ALLOWED_HOSTS', 'NOT SET')}")
+    print(f"DEBUG: {os.environ.get('DEBUG', 'NOT SET')}")
+    print(f"SECRET_KEY: {'SET' if os.environ.get('SECRET_KEY') else 'NOT SET'}")
+    print(f"CORS_ALLOWED_ORIGINS: {os.environ.get('CORS_ALLOWED_ORIGINS', 'NOT SET')}")
+    print("===================================")
+    
     # Get port from environment variable, default to 8000
     port = os.environ.get('PORT', '8000')
     
