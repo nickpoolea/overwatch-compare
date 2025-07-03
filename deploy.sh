@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Simple deployment script for Docker
+# Simple deployment script
 # Usage: ./deploy.sh [production|development]
 
 ENV=${1:-development}
@@ -14,12 +14,13 @@ if [ "$ENV" = "production" ]; then
     docker-compose down
     
     # Build and start with production settings
-    DJANGO_SETTINGS_MODULE=overwatch_api.settings \
+    SECRET_KEY=${SECRET_KEY:-$(openssl rand -base64 32)} \
     DEBUG=False \
+    DOMAIN=${DOMAIN:-yourdomain.com} \
     docker-compose up --build -d
     
     echo "✅ Production deployment complete!"
-    echo "🌐 App should be available at your domain"
+    echo "🌐 App available at: http://localhost:8000"
     
 elif [ "$ENV" = "development" ]; then
     echo "📋 Development deployment"
@@ -28,12 +29,13 @@ elif [ "$ENV" = "development" ]; then
     docker-compose down
     
     # Build and start with development settings
+    SECRET_KEY=dev-secret-key \
     DEBUG=True \
+    DOMAIN=localhost \
     docker-compose up --build -d
     
     echo "✅ Development deployment complete!"
-    echo "🌐 Frontend: http://localhost"
-    echo "🔧 Backend: http://localhost:8000"
+    echo "🌐 App available at: http://localhost:8000"
     
 else
     echo "❌ Invalid environment. Use 'production' or 'development'"

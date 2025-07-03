@@ -1,4 +1,6 @@
-# Single Platform Dockerfile - Serves both frontend and backend
+# Full-stack Overwatch Comparison App
+# Builds React frontend and serves everything through Django
+
 FROM node:18-alpine as frontend-builder
 
 # Build React frontend
@@ -8,7 +10,7 @@ RUN npm ci --only=production
 COPY frontend/ .
 RUN npm run build
 
-# Python backend stage
+# Main Python stage
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -16,7 +18,6 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
-    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -27,20 +28,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./
 
 # Copy built frontend from previous stage
-COPY --from=frontend-builder /app/frontend/build ./static/
-
-# Copy nginx configuration for serving frontend + proxying API
-COPY nginx-unified.conf /etc/nginx/sites-available/default
+COPY --from=frontend-builder /app/frontend/build ./frontend/build/
 
 # Collect Django static files
 RUN python manage.py collectstatic --noinput
 
-# Create start script
-COPY start-unified.sh ./
-RUN chmod +x start-unified.sh
-
 # Expose port
-EXPOSE 80
+EXPOSE 8000
 
-# Start both nginx and Django
-CMD ["./start-unified.sh"]
+# Start Django (serves both API and frontend)
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
