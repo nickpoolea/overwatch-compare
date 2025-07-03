@@ -34,25 +34,10 @@ urlpatterns = [
 
 # Serve static files in both development and production
 # In production, this is needed since we're using Django's runserver
-from django.views.static import serve
-from django.http import FileResponse
-import mimetypes
-import os
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-def serve_static_with_mime(request, path, document_root=None, show_indexes=False):
-    """Custom static file handler with proper MIME types."""
-    response = serve(request, path, document_root, show_indexes)
-    
-    # Ensure proper MIME types
-    if path.endswith('.css'):
-        response['Content-Type'] = 'text/css; charset=utf-8'
-    elif path.endswith('.js'):
-        response['Content-Type'] = 'application/javascript; charset=utf-8'
-    elif path.endswith('.json'):
-        response['Content-Type'] = 'application/json; charset=utf-8'
-    
-    return response
-
-urlpatterns += [
-    re_path(r'^static/(?P<path>.*)$', serve_static_with_mime, {'document_root': settings.STATIC_ROOT}),
-]
+# Also serve files from the React build directory directly
+if hasattr(settings, 'STATICFILES_DIRS'):
+    for static_dir in settings.STATICFILES_DIRS:
+        if 'frontend/build' in static_dir:
+            urlpatterns += static('/', document_root=static_dir)

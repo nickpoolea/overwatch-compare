@@ -21,6 +21,8 @@ def react_app_view(request):
         response = HttpResponse(template.render(request=request))
         response['Content-Type'] = 'text/html; charset=utf-8'
         response['X-Content-Type-Options'] = 'nosniff'
+        # Add permissive CSP for now to allow React to load
+        response['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
         return response
     except TemplateDoesNotExist:
         # Fallback: try to serve the file directly
@@ -35,6 +37,7 @@ def react_app_view(request):
                     content = f.read()
                 response = HttpResponse(content, content_type='text/html; charset=utf-8')
                 response['X-Content-Type-Options'] = 'nosniff'
+                response['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
                 return response
         
         return HttpResponse("React app not found", status=404)

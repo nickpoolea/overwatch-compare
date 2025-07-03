@@ -28,8 +28,9 @@ if [ -d "frontend/build" ]; then
     ls -la frontend/build/
     if [ -f "frontend/build/index.html" ]; then
         echo "✅ Found index.html"
-        echo "📄 First few lines of index.html:"
-        head -10 frontend/build/index.html
+        echo "📄 Full content of index.html:"
+        cat frontend/build/index.html
+        echo "📄 End of index.html"
     else
         echo "❌ index.html not found!"
     fi
@@ -37,8 +38,23 @@ if [ -d "frontend/build" ]; then
         echo "✅ Found static directory"
         echo "📁 Contents of frontend/build/static:"
         ls -la frontend/build/static/
+        if [ -d "frontend/build/static/js" ]; then
+            echo "📁 Contents of frontend/build/static/js:"
+            ls -la frontend/build/static/js/
+        fi
+        if [ -d "frontend/build/static/css" ]; then
+            echo "📁 Contents of frontend/build/static/css:"
+            ls -la frontend/build/static/css/
+        fi
     else
         echo "❌ static directory not found!"
+    fi
+    if [ -f "frontend/build/manifest.json" ]; then
+        echo "✅ Found manifest.json"
+        echo "📄 Content of manifest.json:"
+        cat frontend/build/manifest.json
+    else
+        echo "❌ manifest.json not found!"
     fi
 else
     echo "❌ frontend/build directory not found!"
