@@ -7,6 +7,8 @@ import subprocess
 import sys
 
 def main():
+    print("🔧 Railway startup script starting...")
+    
     # Debug: Print environment variables
     print("=== ENVIRONMENT VARIABLES DEBUG ===")
     print(f"PORT: {os.environ.get('PORT', 'NOT SET')}")
@@ -16,6 +18,23 @@ def main():
     print(f"CORS_ALLOWED_ORIGINS: {os.environ.get('CORS_ALLOWED_ORIGINS', 'NOT SET')}")
     print("===================================")
     
+    # Ensure we're in the right directory
+    print(f"📍 Current working directory: {os.getcwd()}")
+    
+    # Change to the backend directory
+    backend_dir = '/app/backend'
+    if os.path.exists(backend_dir):
+        os.chdir(backend_dir)
+        print(f"📁 Changed to backend directory: {os.getcwd()}")
+    else:
+        print(f"❌ Backend directory not found: {backend_dir}")
+        # Try relative path
+        if os.path.exists('backend'):
+            os.chdir('backend')
+            print(f"📁 Changed to relative backend directory: {os.getcwd()}")
+        else:
+            print("❌ No backend directory found, staying in current directory")
+    
     # Get port from environment variable, default to 8000
     port = os.environ.get('PORT', '8000')
     
@@ -23,11 +42,19 @@ def main():
     
     # Run migrations
     print("📋 Running migrations...")
-    subprocess.run([sys.executable, 'manage.py', 'migrate', '--noinput'], check=True)
+    result = subprocess.run([sys.executable, 'manage.py', 'migrate', '--noinput'], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"❌ Migration failed: {result.stderr}")
+    else:
+        print("✅ Migrations completed successfully")
     
     # Collect static files
     print("📁 Collecting static files...")
-    subprocess.run([sys.executable, 'manage.py', 'collectstatic', '--noinput'], check=True)
+    result = subprocess.run([sys.executable, 'manage.py', 'collectstatic', '--noinput'], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"❌ Static collection failed: {result.stderr}")
+    else:
+        print("✅ Static files collected successfully")
     
     # Start server
     print(f"🌐 Starting server on 0.0.0.0:{port}")
