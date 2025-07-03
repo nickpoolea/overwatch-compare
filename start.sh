@@ -2,64 +2,11 @@
 # Startup script for Railway deployment
 
 echo "🚀 Starting Overwatch Comparison App..."
-echo "📍 Current directory: $(pwd)"
-echo "📁 Directory contents:"
-ls -la
-
-echo "=== ENVIRONMENT VARIABLES DEBUG ==="
-echo "PORT: ${PORT:-NOT SET}"
-echo "ALLOWED_HOSTS: ${ALLOWED_HOSTS:-NOT SET}"
-echo "DEBUG: ${DEBUG:-NOT SET}"
-echo "SECRET_KEY: $(if [ -n "$SECRET_KEY" ]; then echo "SET"; else echo "NOT SET"; fi)"
-echo "CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-NOT SET}"
-echo "==================================="
 
 # Check if we need to change to backend directory
 if [ -d "backend" ]; then
     echo "📁 Changing to backend directory..."
     cd backend
-    echo "📁 Now in: $(pwd)"
-fi
-
-echo "🔍 Checking for React build files..."
-if [ -d "frontend/build" ]; then
-    echo "✅ Found frontend/build directory"
-    echo "📁 Contents of frontend/build:"
-    ls -la frontend/build/
-    if [ -f "frontend/build/index.html" ]; then
-        echo "✅ Found index.html"
-        echo "📄 Full content of index.html:"
-        cat frontend/build/index.html
-        echo "📄 End of index.html"
-    else
-        echo "❌ index.html not found!"
-    fi
-    if [ -d "frontend/build/static" ]; then
-        echo "✅ Found static directory"
-        echo "📁 Contents of frontend/build/static:"
-        ls -la frontend/build/static/
-        if [ -d "frontend/build/static/js" ]; then
-            echo "📁 Contents of frontend/build/static/js:"
-            ls -la frontend/build/static/js/
-        fi
-        if [ -d "frontend/build/static/css" ]; then
-            echo "📁 Contents of frontend/build/static/css:"
-            ls -la frontend/build/static/css/
-        fi
-    else
-        echo "❌ static directory not found!"
-    fi
-    if [ -f "frontend/build/manifest.json" ]; then
-        echo "✅ Found manifest.json"
-        echo "📄 Content of manifest.json:"
-        cat frontend/build/manifest.json
-    else
-        echo "❌ manifest.json not found!"
-    fi
-else
-    echo "❌ frontend/build directory not found!"
-    echo "📁 Looking for alternative paths..."
-    find . -name "index.html" -type f 2>/dev/null || echo "No index.html files found"
 fi
 
 # Run migrations
@@ -69,15 +16,6 @@ python3 manage.py migrate --noinput
 # Collect static files
 echo "📁 Collecting static files..."
 python3 manage.py collectstatic --noinput
-
-# Check what was collected
-echo "🔍 Checking collected static files..."
-if [ -d "staticfiles" ]; then
-    echo "✅ staticfiles directory exists"
-    ls -la staticfiles/ | head -10
-else
-    echo "❌ staticfiles directory not found!"
-fi
 
 # Start the server
 PORT=${PORT:-8000}
