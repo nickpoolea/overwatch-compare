@@ -1,0 +1,10 @@
+{
+  "build": {
+    "commands": [
+      "./build.sh"
+    ]
+  },
+  "deploy": {
+    "startCommand": "bash start.sh"
+  }
+}

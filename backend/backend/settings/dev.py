@@ -1,0 +1,15 @@
+from .base import *
+
+DEBUG = True
+
+# Development-specific settings can go here
+if not hasattr(globals(), 'SECURE_BROWSER_XSS_FILTER'):
+    SECURE_BROWSER_XSS_FILTER = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_SECONDS = 0
+SECURE_REDIRECT_EXEMPT = []
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_PROXY_SSL_HEADER = None
