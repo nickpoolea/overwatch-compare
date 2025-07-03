@@ -12,6 +12,10 @@ npm run build --prefix frontend
 echo "🐍 Installing Python dependencies..."
 pip install -r backend/requirements.txt
 
+# Make startup script executable
+echo "🔧 Making startup script executable..."
+chmod +x start.sh
+
 # Note: collectstatic will be run by Django when needed in production
 
 echo "✅ Build complete!"
