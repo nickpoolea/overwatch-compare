@@ -1,0 +1,46 @@
+# Single Platform Dockerfile - Serves both frontend and backend
+FROM node:18-alpine as frontend-builder
+
+# Build React frontend
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci --only=production
+COPY frontend/ .
+RUN npm run build
+
+# Python backend stage
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    nginx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY backend/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend code
+COPY backend/ ./
+
+# Copy built frontend from previous stage
+COPY --from=frontend-builder /app/frontend/build ./static/
+
+# Copy nginx configuration for serving frontend + proxying API
+COPY nginx-unified.conf /etc/nginx/sites-available/default
+
+# Collect Django static files
+RUN python manage.py collectstatic --noinput
+
+# Create start script
+COPY start-unified.sh ./
+RUN chmod +x start-unified.sh
+
+# Expose port
+EXPOSE 80
+
+# Start both nginx and Django
+CMD ["./start-unified.sh"]

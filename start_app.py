@@ -39,17 +39,164 @@ class AppLauncher:
         if not (self.frontend_dir / "package.json").exists():
             print(f"❌ React package.json not found in: {self.frontend_dir}")
             return False
+        
+        # Check Python executable
+        try:
+            result = subprocess.run([self.get_python_executable(), "--version"], 
+                                  capture_output=True, text=True)
+            if result.returncode != 0:
+                print("❌ Python executable not found")
+                return False
+            print(f"✅ Python found: {result.stdout.strip()}")
+        except FileNotFoundError:
+            print("❌ Python executable not found")
+            return False
             
         print("✅ All dependencies found!")
         return True
+    
+    def check_ports(self):
+        """Check if required ports are available"""
+        import socket
+        
+        def is_port_available(port):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(('localhost', port))
+                    return True
+                except OSError:
+                    return False
+        
+        print("🔌 Checking port availability...")
+        
+        if not is_port_available(8000):
+            print("⚠️  Port 8000 is in use, attempting to free it...")
+            try:
+                # Try to kill processes on port 8000
+                subprocess.run(["lsof", "-ti:8000"], capture_output=True, text=True, check=True)
+                subprocess.run("lsof -ti:8000 | xargs kill -9 2>/dev/null || true", shell=True)
+                time.sleep(2)
+                if not is_port_available(8000):
+                    print("❌ Could not free port 8000. Please manually stop any Django servers.")
+                    return False
+                else:
+                    print("✅ Port 8000 freed")
+            except:
+                print("❌ Port 8000 is in use and could not be freed")
+                return False
+        
+        if not is_port_available(3000):
+            print("⚠️  Port 3000 is in use, attempting to free it...")
+            try:
+                subprocess.run("lsof -ti:3000 | xargs kill -9 2>/dev/null || true", shell=True)
+                time.sleep(2)
+                if not is_port_available(3000):
+                    print("❌ Could not free port 3000. Please manually stop any React servers.")
+                    return False
+                else:
+                    print("✅ Port 3000 freed")
+            except:
+                print("❌ Port 3000 is in use and could not be freed")
+                return False
+        
+        print("✅ Ports 8000 and 3000 are available!")
+        return True
+    
+    def get_python_executable(self):
+        """Get the appropriate Python executable"""
+        # Try python3 first, then python
+        for cmd in ["python3", "python"]:
+            try:
+                result = subprocess.run([cmd, "--version"], 
+                                      capture_output=True, text=True)
+                if result.returncode == 0:
+                    return cmd
+            except FileNotFoundError:
+                continue
+        return "python3"  # Default fallback
+        """Get the appropriate Python executable"""
+        # Try python3 first, then python
+        for cmd in ["python3", "python"]:
+            try:
+                result = subprocess.run([cmd, "--version"], 
+                                      capture_output=True, text=True)
+                if result.returncode == 0:
+                    return cmd
+            except FileNotFoundError:
+                continue
+        return "python3"  # Default fallback
+    
+    def check_and_install_python_deps(self):
+        """Check and install Python dependencies"""
+        print("📦 Checking Python dependencies...")
+        
+        python_cmd = self.get_python_executable()
+        
+        # Check if Django is installed
+        try:
+            result = subprocess.run([python_cmd, "-c", "import django; print('Django', django.VERSION)"], 
+                                  capture_output=True, text=True, cwd=self.backend_dir)
+            if result.returncode == 0:
+                print(f"✅ {result.stdout.strip()}")
+                return True
+        except:
+            pass
+        
+        print("📦 Installing Python dependencies from requirements.txt...")
+        try:
+            # Check if requirements.txt exists
+            requirements_file = self.backend_dir / "requirements.txt"
+            if requirements_file.exists():
+                print("Installing from requirements.txt...")
+                result = subprocess.run([python_cmd, "-m", "pip", "install", "-r", "requirements.txt"], 
+                                      capture_output=True, text=True, cwd=self.backend_dir)
+                if result.returncode != 0:
+                    print(f"❌ Failed to install from requirements.txt: {result.stderr}")
+                    return False
+                print("✅ Python dependencies installed from requirements.txt!")
+                return True
+            else:
+                # Fallback to individual package installation
+                print("requirements.txt not found, installing individual packages...")
+                packages = [
+                    "django",
+                    "djangorestframework", 
+                    "django-cors-headers",
+                    "requests"
+                ]
+                
+                for package in packages:
+                    print(f"Installing {package}...")
+                    result = subprocess.run([python_cmd, "-m", "pip", "install", package], 
+                                          capture_output=True, text=True)
+                    if result.returncode != 0:
+                        print(f"❌ Failed to install {package}: {result.stderr}")
+                        return False
+                
+                print("✅ Python dependencies installed!")
+                return True
+        except Exception as e:
+            print(f"❌ Failed to install Python dependencies: {e}")
+            return False
     
     def start_backend(self):
         """Start Django backend server"""
         print("🚀 Starting Django backend...")
         try:
             os.chdir(self.backend_dir)
+            python_cmd = self.get_python_executable()
+            
+            # Run migrations first
+            print("📋 Running Django migrations...")
+            migrate_result = subprocess.run([python_cmd, "manage.py", "migrate"], 
+                                          capture_output=True, text=True)
+            if migrate_result.returncode != 0:
+                print(f"⚠️  Migration warning: {migrate_result.stderr}")
+            else:
+                print("✅ Migrations completed!")
+            
             self.backend_process = subprocess.Popen(
-                [sys.executable, "manage.py", "runserver", "8000"],
+                [python_cmd, "manage.py", "runserver", "8000"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 universal_newlines=True,
@@ -98,15 +245,49 @@ class AppLauncher:
         """Monitor backend and frontend processes"""
         def monitor_backend():
             if self.backend_process:
-                for line in iter(self.backend_process.stdout.readline, ''):
-                    if line.strip():
-                        print(f"[BACKEND] {line.strip()}")
+                try:
+                    while True:
+                        output = self.backend_process.stdout.readline()
+                        if output:
+                            print(f"[BACKEND] {output.strip()}")
+                        else:
+                            break
+                except:
+                    pass
+                    
+                try:
+                    while True:
+                        error = self.backend_process.stderr.readline()
+                        if error:
+                            print(f"[BACKEND ERROR] {error.strip()}")
+                        else:
+                            break
+                except:
+                    pass
                         
         def monitor_frontend():
             if self.frontend_process:
-                for line in iter(self.frontend_process.stdout.readline, ''):
-                    if line.strip() and "webpack" not in line.lower():
-                        print(f"[FRONTEND] {line.strip()}")
+                try:
+                    while True:
+                        output = self.frontend_process.stdout.readline()
+                        if output:
+                            line = output.strip()
+                            if line and "webpack" not in line.lower():
+                                print(f"[FRONTEND] {line}")
+                        else:
+                            break
+                except:
+                    pass
+                    
+                try:
+                    while True:
+                        error = self.frontend_process.stderr.readline()
+                        if error:
+                            print(f"[FRONTEND ERROR] {error.strip()}")
+                        else:
+                            break
+                except:
+                    pass
         
         # Start monitoring threads
         if self.backend_process:
@@ -158,6 +339,14 @@ class AppLauncher:
         if not self.check_dependencies():
             sys.exit(1)
         
+        # Check port availability
+        if not self.check_ports():
+            sys.exit(1)
+        
+        # Check and install Python dependencies
+        if not self.check_and_install_python_deps():
+            sys.exit(1)
+        
         # Start servers
         if not self.start_backend():
             sys.exit(1)
@@ -186,6 +375,11 @@ class AppLauncher:
             while True:
                 if self.backend_process and self.backend_process.poll() is not None:
                     print("❌ Backend process died!")
+                    # Print any remaining output
+                    if self.backend_process.stderr:
+                        stderr_output = self.backend_process.stderr.read()
+                        if stderr_output:
+                            print(f"Backend error: {stderr_output}")
                     break
                 if self.frontend_process and self.frontend_process.poll() is not None:
                     print("❌ Frontend process died!")

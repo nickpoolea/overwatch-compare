@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 // Utility functions for number formatting
 const formatNumber = (value) => {
@@ -200,52 +200,79 @@ function App() {
 
   const renderCategoryStats = (category) => {
     return (
-      <div key={category.name} className="category-section">
-        <h3 className="category-title">{category.name}</h3>
-        <div className="stats-table">
-          <div className="stats-header">
-            <div className="stat-name">Stat</div>
-            <div className="player-value">{comparison.player1}</div>
-            <div className="player-value">{comparison.player2}</div>
-            <div className="difference">Difference</div>
-          </div>
-          {category.stats.map((stat, index) => {
-            // Determine if this is a percentage stat
-            const isPercentage = isPercentageStat(stat.key, stat.label);
-            
-            // Format the values appropriately
-            const player1Value = isPercentage 
-              ? formatPercentage(stat.player1_value) 
-              : formatNumber(stat.player1_value);
-            
-            const player2Value = isPercentage 
-              ? formatPercentage(stat.player2_value) 
-              : formatNumber(stat.player2_value);
-            
-            const differenceValue = formatDifference(stat.difference, stat.label);
-            
-            return (
-              <div key={index} className="stats-row">
-                <div className="stat-name">{stat.label}</div>
-                <div className="player-value">{player1Value}</div>
-                <div className="player-value">{player2Value}</div>
-                <div className="difference">{differenceValue}</div>
-              </div>
-            );
-          })}
+      <div key={category.name} className="result-card">
+        <div className="result-card-header">
+          <h3 className="result-card-title">{category.name}</h3>
+        </div>
+        <div className="result-card-body">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Stat</th>
+                <th>{comparison.player1}</th>
+                <th>{comparison.player2}</th>
+                <th>Difference</th>
+              </tr>
+            </thead>
+            <tbody>
+              {category.stats.map((stat, index) => {
+                // Determine if this is a percentage stat
+                const isPercentage = isPercentageStat(stat.key, stat.label);
+                
+                // Format the values appropriately
+                const player1Value = isPercentage 
+                  ? formatPercentage(stat.player1_value) 
+                  : formatNumber(stat.player1_value);
+                
+                const player2Value = isPercentage 
+                  ? formatPercentage(stat.player2_value) 
+                  : formatNumber(stat.player2_value);
+                
+                const differenceValue = formatDifference(stat.difference, stat.label);
+                
+                // Determine badge type
+                let badgeClass = 'neutral';
+                if (stat.difference > 0) badgeClass = 'positive';
+                else if (stat.difference < 0) badgeClass = 'negative';
+                
+                return (
+                  <tr key={index}>
+                    <td><strong>{stat.label}</strong></td>
+                    <td>{player1Value}</td>
+                    <td>{player2Value}</td>
+                    <td>
+                      <span className={`stat-badge ${badgeClass}`}>
+                        {differenceValue}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          
           {category.summary && Object.keys(category.summary).length > 0 && (
-            <div className="category-summary">
-              <div className="summary-row">
-                <div className="stat-name">Category Summary:</div>
-                <div className="player-value">Wins: {category.summary.player1_wins}</div>
-                <div className="player-value">Wins: {category.summary.player2_wins}</div>
-                <div className="difference">Ties: {category.summary.ties}</div>
-              </div>
-              <div className="summary-row">
-                <div className="stat-name">Average:</div>
-                <div className="player-value">{formatNumber(category.summary.player1_average)}</div>
-                <div className="player-value">{formatNumber(category.summary.player2_average)}</div>
-                <div className="difference">{formatDifference(category.summary.average_difference)}</div>
+            <div className="alert alert-info" style={{marginTop: '20px'}}>
+              <div className="analysis-title">Category Summary</div>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginTop: '12px'}}>
+                <div className="score-item">
+                  <span className="player-name">Wins - {comparison.player1}:</span>
+                  <span className="score-value">{category.summary.player1_wins}</span>
+                </div>
+                <div className="score-item">
+                  <span className="player-name">Wins - {comparison.player2}:</span>
+                  <span className="score-value">{category.summary.player2_wins}</span>
+                </div>
+                <div className="score-item">
+                  <span className="player-name">Ties:</span>
+                  <span className="score-value">{category.summary.ties}</span>
+                </div>
+                <div className="score-item">
+                  <span className="player-name">Avg Difference:</span>
+                  <span className={`stat-badge ${category.summary.average_difference > 0 ? 'positive' : category.summary.average_difference < 0 ? 'negative' : 'neutral'}`}>
+                    {formatDifference(category.summary.average_difference)}
+                  </span>
+                </div>
               </div>
             </div>
           )}
@@ -256,45 +283,45 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
+      <header className="google-header">
         <h1>Overwatch Player Comparison</h1>
       </header>
 
-      <main className="main-content">
-        <form onSubmit={handleSubmit} className="comparison-form">
+      <div className="main-container">
+        <form onSubmit={handleSubmit} className="search-form">
           <div className="form-group">
-            <label htmlFor="player1">Player 1 BattleTag:</label>
+            <label className="form-label">Player 1 BattleTag</label>
             <input
               type="text"
-              id="player1"
               name="player1"
               value={formData.player1}
               onChange={handleInputChange}
               placeholder="e.g., BaconChee#1321"
+              className="form-input"
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="player2">Player 2 BattleTag:</label>
+            <label className="form-label">Player 2 BattleTag</label>
             <input
               type="text"
-              id="player2"
               name="player2"
               value={formData.player2}
               onChange={handleInputChange}
               placeholder="e.g., Player2#1234"
+              className="form-input"
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="hero">Hero:</label>
+            <label className="form-label">Hero</label>
             <select
-              id="hero"
               name="hero"
               value={formData.hero}
               onChange={handleInputChange}
+              className="form-select"
               required
             >
               <option value="">Select a hero</option>
@@ -308,12 +335,12 @@ function App() {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="gamemode">Game Mode:</label>
+              <label className="form-label">Game Mode</label>
               <select
-                id="gamemode"
                 name="gamemode"
                 value={formData.gamemode}
                 onChange={handleInputChange}
+                className="form-select"
               >
                 <option value="quickplay">Quickplay</option>
                 <option value="competitive">Competitive</option>
@@ -321,12 +348,12 @@ function App() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="platform">Platform:</label>
+              <label className="form-label">Platform</label>
               <select
-                id="platform"
                 name="platform"
                 value={formData.platform}
                 onChange={handleInputChange}
+                className="form-select"
               >
                 <option value="pc">PC</option>
                 <option value="console">Console</option>
@@ -334,95 +361,127 @@ function App() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="submit-btn">
-            {loading ? 'Comparing...' : 'Compare Players'}
-          </button>
+          <div className="search-buttons">
+            <button 
+              type="submit" 
+              className="google-btn primary"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Comparing...
+                </>
+              ) : (
+                'Compare Players'
+              )}
+            </button>
+          </div>
         </form>
 
         {error && (
-          <div className="error-message">
-            <p>{error}</p>
+          <div className="alert alert-danger">
+            <strong>Error:</strong> {error}
           </div>
         )}
+      </div>
 
-        {comparison && (
-          <div className="comparison-results">
-            <h2>
-              {comparison.hero.toUpperCase()} Comparison: {comparison.player1} vs {comparison.player2}
-            </h2>
-            
-            {/* Enhanced Analysis Summary */}
-            {comparison.enhanced_analysis && (
-              <div className="enhanced-analysis">
-                <h3 className="analysis-title">Performance Analysis</h3>
+      {comparison && (
+        <div className="results-container">
+          <div className="alert alert-success">
+            <strong>{comparison.hero.toUpperCase()} Comparison:</strong> {comparison.player1} vs {comparison.player2}
+          </div>
+          
+          {/* Enhanced Analysis Summary */}
+          {comparison.enhanced_analysis && (
+            <div className="result-card">
+              <div className="result-card-header">
+                <h2 className="result-card-title">Performance Analysis</h2>
+              </div>
+              <div className="result-card-body">
                 <div className="analysis-grid">
-                  <div className="analysis-card">
-                    <h4>Overall Performance Scores</h4>
-                    <div className="score-comparison">
-                      <div className="score-item">
-                        <span className="player-name">{comparison.player1}:</span>
-                        <span className="score-value">{formatScore(comparison.enhanced_analysis.performance_scores.player1_weighted_score)}%</span>
-                      </div>
-                      <div className="score-item">
-                        <span className="player-name">{comparison.player2}:</span>
-                        <span className="score-value">{formatScore(comparison.enhanced_analysis.performance_scores.player2_weighted_score)}%</span>
-                      </div>
-                      <div className="score-difference">
-                        <span>Difference: {formatDifference(comparison.enhanced_analysis.performance_scores.score_difference * 100)}%</span>
-                      </div>
+                  <div className="analysis-item">
+                    <div className="analysis-title">Overall Performance Scores</div>
+                    <div className="score-item">
+                      <span className="player-name">{comparison.player1}:</span>
+                      <span className="score-value">{formatScore(comparison.enhanced_analysis.performance_scores.player1_weighted_score)}%</span>
+                    </div>
+                    <div className="score-item">
+                      <span className="player-name">{comparison.player2}:</span>
+                      <span className="score-value">{formatScore(comparison.enhanced_analysis.performance_scores.player2_weighted_score)}%</span>
+                    </div>
+                    <div className="score-item">
+                      <span className="player-name">Difference:</span>
+                      <span className="score-value">{formatDifference(comparison.enhanced_analysis.performance_scores.score_difference * 100)}%</span>
                     </div>
                   </div>
                   
-                  <div className="analysis-card">
-                    <h4>Role Effectiveness ({comparison.enhanced_analysis.role_effectiveness.hero_role})</h4>
-                    <div className="effectiveness-comparison">
-                      <div className="effectiveness-item">
-                        <span className="player-name">{comparison.player1}:</span>
-                        <span className="effectiveness-value">{formatScore(comparison.enhanced_analysis.role_effectiveness.player1_effectiveness)}%</span>
-                      </div>
-                      <div className="effectiveness-item">
-                        <span className="player-name">{comparison.player2}:</span>
-                        <span className="effectiveness-value">{formatScore(comparison.enhanced_analysis.role_effectiveness.player2_effectiveness)}%</span>
-                      </div>
+                  <div className="analysis-item">
+                    <div className="analysis-title">
+                      Role Effectiveness ({comparison.enhanced_analysis.role_effectiveness.hero_role})
+                    </div>
+                    <div className="score-item">
+                      <span className="player-name">{comparison.player1}:</span>
+                      <span className="score-value">{formatScore(comparison.enhanced_analysis.role_effectiveness.player1_effectiveness)}%</span>
+                    </div>
+                    <div className="score-item">
+                      <span className="player-name">{comparison.player2}:</span>
+                      <span className="score-value">{formatScore(comparison.enhanced_analysis.role_effectiveness.player2_effectiveness)}%</span>
                     </div>
                   </div>
                   
                   {comparison.enhanced_analysis.insights && (
-                    <div className="analysis-card insights-card">
-                      <h4>Key Insights</h4>
-                      <p className="overall-verdict">{comparison.enhanced_analysis.insights.overall_verdict}</p>
-                      
-                      {comparison.enhanced_analysis.insights.key_strengths.player1.length > 0 && (
-                        <div className="strengths">
-                          <strong>{comparison.player1} excels in:</strong>
-                          <span className="strength-tags">
-                            {comparison.enhanced_analysis.insights.key_strengths.player1.join(', ')}
-                          </span>
+                    <div className="analysis-item">
+                      <div className="analysis-title">Key Insights</div>
+                      <div className="insights-content">
+                        <div className="verdict">
+                          {comparison.enhanced_analysis.insights.overall_verdict}
                         </div>
-                      )}
-                      
-                      {comparison.enhanced_analysis.insights.key_strengths.player2.length > 0 && (
-                        <div className="strengths">
-                          <strong>{comparison.player2} excels in:</strong>
-                          <span className="strength-tags">
-                            {comparison.enhanced_analysis.insights.key_strengths.player2.join(', ')}
-                          </span>
-                        </div>
-                      )}
+                        
+                        {comparison.enhanced_analysis.insights.key_strengths.player1.length > 0 && (
+                          <div style={{marginBottom: '12px'}}>
+                            <div style={{fontWeight: '500', marginBottom: '6px'}}>
+                              {comparison.player1} excels in:
+                            </div>
+                            <div className="strength-tags">
+                              {comparison.enhanced_analysis.insights.key_strengths.player1.map((strength, idx) => (
+                                <span key={idx} className="strength-tag">{strength}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {comparison.enhanced_analysis.insights.key_strengths.player2.length > 0 && (
+                          <div>
+                            <div style={{fontWeight: '500', marginBottom: '6px'}}>
+                              {comparison.player2} excels in:
+                            </div>
+                            <div className="strength-tags">
+                              {comparison.enhanced_analysis.insights.key_strengths.player2.map((strength, idx) => (
+                                <span key={idx} className="strength-tag">{strength}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
-            )}
-            
-            {/* Detailed Stats */}
-            <div className="detailed-stats">
-              <h3 className="stats-title">Detailed Statistics</h3>
+            </div>
+          )}
+          
+          {/* Detailed Stats */}
+          <div className="result-card">
+            <div className="result-card-header">
+              <h2 className="result-card-title">Detailed Statistics</h2>
+            </div>
+            <div className="result-card-body">
               {comparison.categories.map(renderCategoryStats)}
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
