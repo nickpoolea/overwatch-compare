@@ -17,17 +17,19 @@ Your app now uses a **unified deployment approach** where Django serves both the
 2. **Deploy on Railway:**
    - Go to [railway.app](https://railway.app)
    - "Deploy from GitHub" → Select your repository
-   - Railway will automatically use the `railway.json` config
+   - Railway will automatically use the `build.sh` script
    - No additional configuration needed!
 
-3. **Set Environment Variables:**
+3. **Set Environment Variables in Railway:**
    ```
    DEBUG=False
    SECRET_KEY=your-secret-key-here
    ALLOWED_HOSTS=*.railway.app,yourdomain.com
    ```
 
-4. **Done!** Railway builds React, installs Django deps, and serves everything from one URL.
+4. **Done!** Railway runs the build script, installs everything, and serves from one URL.
+
+**Note**: If you see "executable `cd` could not be found" error, that's fixed now with the `build.sh` script approach.
 
 ---
 
